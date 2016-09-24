@@ -1,0 +1,18 @@
+Package: FitHiC
+Type: Package
+Title: Confidence estimation for intra-chromosomal contact maps
+Version: 0.99.0
+Date: 2016-08-28
+Author: Python original by Ferhat Ay. R port by Ruyu Tan.
+Maintainer: Ruyu Tan <tanry33@gmail.com>
+Description: Fit-Hi-C is a tool for assigning statistical confidence estimates
+    to intra-chromosomal contact maps produced by genome-wide genome
+    architecture assays such as Hi-C.
+License: GPL (>= 2)
+biocViews: DNA3DStructure, Software
+Imports: data.table, fdrtool, grDevices, graphics, Rcpp, stats, utils
+LinkingTo: Rcpp
+RoxygenNote: 5.0.1
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr
