@@ -1,4 +1,4 @@
-# fithic
+# Fit-Hi-C
 
 [Fit-Hi-C](https://noble.gs.washington.edu/proj/fit-hi-c/) is a tool for assigning statistical confidence estimates to intra-chromosomal contact maps produced by genome-wide genome architecture assays such as Hi-C. Compared to Python original, Fit-Hi-C R port has the following advantages:
 
