@@ -64,11 +64,12 @@ to intra-chromosomal contact maps produced by genome-wide genome
 architecture assays such as Hi-C.
 }
 \examples{
-FitHiC(system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz",
-    package = "FitHiC"), system.file("extdata",
-    "contactCounts/Duan_yeast_EcoRI.gz", package = "FitHiC"), getwd(),
-    libname="Duan_yeast_EcoRI", distUpThres=250000, distLowThres=10000,
-    visual=TRUE)
+fragsfile <- system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz",
+    package = "FitHiC")
+intersfile <- system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz",
+    package = "FitHiC")
+FitHiC(fragsfile, intersfile, getwd(), libname="Duan_yeast_EcoRI",
+    distUpThres=250000, distLowThres=10000, visual=TRUE)
 
 }
 \author{

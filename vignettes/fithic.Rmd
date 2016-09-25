@@ -10,30 +10,51 @@ vignette: >
 ---
 
 ## Introduction
-[Fit-Hi-C](https://noble.gs.washington.edu/proj/fit-hi-c/) is a tool for assigning statistical confidence estimates to intra-chromosomal contact maps produced by genome-wide genome architecture assays such as Hi-C. Compared to Python original, Fit-Hi-C R port has the following advantages:
+[Fit-Hi-C](https://noble.gs.washington.edu/proj/fit-hi-c/) is a tool for
+assigning statistical confidence estimates to intra-chromosomal contact maps
+produced by genome-wide genome architecture assays such as Hi-C. Compared to
+Python original, Fit-Hi-C R port has the following advantages:
 
-- Fit-Hi-C R package is more efficient than Python original by re-writting some logic in C/C++
-- Fit-Hi-C R package is easy to use for those familiar with R language without additional configuration
+- Fit-Hi-C R package is more efficient than Python original by re-writting some
+logic in C/C++
+- Fit-Hi-C R package is easy to use for those familiar with R language without
+additional configuration
 
 ## Data Preparation
 
 Before running Fit-Hi-C, two input files should be prepared.
 
-* __FRAGSFILE__ This file stores the information about midpoints (or start indices) of the fragments. It should consist of 5 columns: first column stands for chromosome name; third column stands for the midPoint; fourth column stands for the hitCount; second column and fifth column can be arbitrary.
+* __FRAGSFILE__ This file stores the information about midpoints (or start
+indices) of the fragments. It should consist of 5 columns: first column stands
+for chromosome name; third column stands for the midPoint; fourth column stands
+for the hitCount; second column and fifth column can be arbitrary.
 
-```{r, echo = FALSE, results = "asis"}
-data <- read.table(gzfile(system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz", package = "FitHiC")), header=FALSE, col.names=c("Chromosome Name", "Column 2", "Mid Point", "Hit Count", "Column 5"))
+```{r fragsfile, echo = FALSE, results = "asis"}
+fragsfile <- system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz",
+    package = "FitHiC")
+data <- read.table(gzfile(fragsfile), header=FALSE,
+    col.names=c("Chromosome Name", "Column 2", "Mid Point", "Hit Count",
+    "Column 5"))
 knitr::kable(head(data, n=6L), align = "crrrr", caption="FRAGSFILE")
 ```
 
-* __INTERSFILE__ This file stores the information about interactions between fragment pairs. It should consist of 5 columns: first column and third column stand for the chromosome names of the fragment pair; second column and fourth column stand for midPoints of the fragment pair; fifth column stands for hitCount.
+* __INTERSFILE__ This file stores the information about interactions between
+fragment pairs. It should consist of 5 columns: first column and third column
+stand for the chromosome names of the fragment pair; second column and fourth
+column stand for midPoints of the fragment pair; fifth column stands for
+hitCount.
 
-```{r, echo=FALSE, results="asis"}
-data <- read.table(gzfile(system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz", package = "FitHiC")), header=FALSE, col.names=c("Chromosome1 Name", "Mid Point 1", "Chromosome2 Name", "Mid Point 2", "Hit Count"))
+```{r intersfile, echo=FALSE, results="asis"}
+intersfile <- system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz",
+    package = "FitHiC")
+data <- read.table(gzfile(intersfile), header=FALSE,
+    col.names=c("Chromosome1 Name", "Mid Point 1", "Chromosome2 Name",
+    "Mid Point 2", "Hit Count"))
 knitr::kable(head(data, n=6L), align = "crcrr", caption="INTERSFILE")
 ```
 
-Besides, __OUTDIR__, the path where the output files will be stored, is also required to be specified.
+Besides, __OUTDIR__, the path where the output files will be stored, is also
+required to be specified.
 
 ## Run Fit-Hi-C
 
@@ -53,43 +74,76 @@ FitHiC(FRAGSFILE, INTERSFILE, OUTDIR, ..., visual=TRUE)
 
 ## Examples
 
-The pre-processed Hi-C data is from Yeast - EcoRI ^[Duan Z, et al. 2010. A three-dimensional model of the yeast genome. Nature 465: 363–367.]. _FRAGSFILE_ and _INTERSFILE_ are located in `system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz", package = "FitHiC")` and `system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz", package = "FitHiC")`, respectively. When input data is ready, run as follows:
+The pre-processed Hi-C data is from Yeast - EcoRI ^[Duan Z, et al. 2010. A
+three-dimensional model of the yeast genome. Nature 465: 363–367.]. _FRAGSFILE_
+and _INTERSFILE_ are located in `system.file("extdata",
+"fragmentLists/Duan_yeast_EcoRI.gz", package = "FitHiC")` and `system.file(
+"extdata", "contactCounts/Duan_yeast_EcoRI.gz", package = "FitHiC")`,
+respectively. When input data is ready, run as follows:
 
 ```{r, eval=FALSE}
 library("FitHiC")
-FitHiC(system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz", package = "FitHiC"), system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz", package = "FitHiC"), getwd(), libname="Duan_yeast_EcoRI", distUpThres=250000, distLowThres=10000)
+fragsfile <- system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz",
+    package = "FitHiC")
+intersfile <- system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz",
+    package = "FitHiC")
+FitHiC(fragsfile, intersfile, getwd(), libname="Duan_yeast_EcoRI",
+    distUpThres=250000, distLowThres=10000)
 ```
 
-Internally, Fit-Hi-C will successively call `generate_FragPairs`, `read_ICE_biases`, `read_All_Interactions`, `calculateing_Probabilities`, `fit_Spline` methods. The execution of Fit-Hi-C will be successfully completed till the following log appears:
+Internally, Fit-Hi-C will successively call `generate_FragPairs`,
+`read_ICE_biases`, `read_All_Interactions`, `calculateing_Probabilities`,
+`fit_Spline` methods. The execution of Fit-Hi-C will be successfully completed
+till the following log appears:
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r run, echo=FALSE, collapse=TRUE, warning=FALSE}
 library("FitHiC")
-FitHiC(system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz", package = "FitHiC"), system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz", package = "FitHiC"), getwd(), libname="Duan_yeast_EcoRI", distUpThres=250000, distLowThres=10000)
+fragsfile <- system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz",
+    package = "FitHiC")
+intersfile <- system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz",
+    package = "FitHiC")
+FitHiC(fragsfile, intersfile, getwd(), libname="Duan_yeast_EcoRI",
+    distUpThres=250000, distLowThres=10000)
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results="hide"}
+```{r run-visual, echo=FALSE, message=FALSE, warning=FALSE, results="hide"}
 library("FitHiC")
-FitHiC(system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz", package = "FitHiC"), system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz", package = "FitHiC"), getwd(), libname="Duan_yeast_EcoRI", distUpThres=250000, distLowThres=10000, visual=TRUE)
+fragsfile <- system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz",
+    package = "FitHiC")
+intersfile <- system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz",
+    package = "FitHiC")
+FitHiC(fragsfile, intersfile, getwd(), libname="Duan_yeast_EcoRI",
+    distUpThres=250000, distLowThres=10000, visual=TRUE)
 ```
 
 The output files come from two internal methods called by Fit-Hi-C.
 
 * __calculate_Probabilites__
 
-```{r, echo=FALSE, results="asis"}
-data <- read.table(file.path(getwd(), "Duan_yeast_EcoRI.fithic_pass1.txt"), header=TRUE)
+```{r calculate-probabilities, echo=FALSE, results="asis"}
+output <- file.path(getwd(), "Duan_yeast_EcoRI.fithic_pass1.txt")
+data <- read.table(output, header=TRUE)
 knitr::kable(head(data, n=6L), caption="Duan_yeast_EcoRI.fithic_pass1.txt")
-data <- read.table(file.path(getwd(), "Duan_yeast_EcoRI.fithic_pass2.txt"), header=TRUE)
+
+output <- file.path(getwd(), "Duan_yeast_EcoRI.fithic_pass2.txt")
+data <- read.table(output, header=TRUE)
 knitr::kable(head(data, n=6L), caption="Duan_yeast_EcoRI.fithic_pass2.txt")
 ```
 
 * __fit_Spline__
 
-```{r, echo=FALSE, results="asis"}
-data <- read.table(gzfile(file.path(getwd(), "Duan_yeast_EcoRI.spline_pass1.significances.txt.gz")), header=TRUE)
-knitr::kable(head(data, n=6L), align="crcrrrr", caption="Duan_yeast_EcoRI.spline_pass1.significances.txt.gz")
-data <- read.table(gzfile(file.path(getwd(), "Duan_yeast_EcoRI.spline_pass2.significances.txt.gz")), header=TRUE)
-knitr::kable(head(data, n=6L), align="crcrrrr", caption="Duan_yeast_EcoRI.spline_pass2.significances.txt.gz")
+```{r fit-spline, echo=FALSE, results="asis"}
+output <- file.path(getwd(),
+    "Duan_yeast_EcoRI.spline_pass1.significances.txt.gz")
+data <- read.table(gzfile(output), header=TRUE)
+knitr::kable(head(data, n=6L), align="crcrrrr",
+    caption="Duan_yeast_EcoRI.spline_pass1.significances.txt.gz")
+
+output <- file.path(getwd(),
+    "Duan_yeast_EcoRI.spline_pass2.significances.txt.gz")
+data <- read.table(gzfile(output), header=TRUE)
+knitr::kable(head(data, n=6L), align="crcrrrr",
+    caption="Duan_yeast_EcoRI.spline_pass2.significances.txt.gz")
 ```
 
 If `visual` is set to TRUE, corresponding images will be also outputed:
@@ -101,6 +155,9 @@ If `visual` is set to TRUE, corresponding images will be also outputed:
 
 ## Support
 
-For questions about the use of Fit-Hi-C method, to request pre-processed Hi-C data or additional features and scripts, or to report bugs and provide feedback please e-mail Ferhat Ay.
+For questions about the use of Fit-Hi-C method, to request pre-processed Hi-C
+data or additional features and scripts, or to report bugs and provide feedback
+please e-mail Ferhat Ay.
 
-[Ferhat Ay](http://noble.gs.washington.edu/~ferhatay) \<ferhatay at uw period edu\>
+[Ferhat Ay](http://noble.gs.washington.edu/~ferhatay)
+\<ferhatay at uw period edu\>

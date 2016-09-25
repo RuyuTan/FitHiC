@@ -45,11 +45,12 @@
 #' @author Ruyu Tan, \email{tanry33@gmail.com}
 #'
 #' @examples
-#' FitHiC(system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz",
-#'     package = "FitHiC"), system.file("extdata",
-#'     "contactCounts/Duan_yeast_EcoRI.gz", package = "FitHiC"), getwd(),
-#'     libname="Duan_yeast_EcoRI", distUpThres=250000, distLowThres=10000,
-#'     visual=TRUE)
+#' fragsfile <- system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz",
+#'     package = "FitHiC")
+#' intersfile <- system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz",
+#'     package = "FitHiC")
+#' FitHiC(fragsfile, intersfile, getwd(), libname="Duan_yeast_EcoRI",
+#'     distUpThres=250000, distLowThres=10000, visual=TRUE)
 #'
 #' @import data.table
 #' @import fdrtool
@@ -65,9 +66,9 @@ noOfBins=100, mappabilityThreshold=1, libname="", distUpThres=-1,
 distLowThres=-1, visual=FALSE) {
 
     distScaling <- 10000.0
-    toKb <- 10**-3
-    toMb <- 10**-6
-    toProb <- 10**5
+    toKb <- 10^-3
+    toMb <- 10^-6
+    toProb <- 10^5
 
     useBinning <- TRUE # This is no more an option
     useInters <- FALSE # This is no more an option
@@ -79,7 +80,7 @@ distLowThres=-1, visual=FALSE) {
         distLowThres <- (-Inf) # -1 by default, means no lower bound
     }
 
-    print("Fit-Hi-C is processing ...")
+    message("Fit-Hi-C is processing ...")
 
     r1 <- generate_FragPairs(fragsfile, mappabilityThreshold, distUpThres,
         distLowThres)
@@ -132,6 +133,10 @@ distLowThres=-1, visual=FALSE) {
         possibleIntraAllCount, possibleIntraInRangeCount,
         maxObservedGenomicDist)
 
+    if (noOfPasses < 1) {
+        stop("Number of passes must be greater than 0")
+    }
+
     for (i in seq(2, noOfPasses + 1)) {
         tempData <- calculate_Probabilities(sortedInteractions, isOutlier,
             paste(libname, ".fithic_pass", i, sep=""), noOfBins, useBinning,
@@ -148,7 +153,7 @@ distLowThres=-1, visual=FALSE) {
             maxObservedGenomicDist)
     }
 
-    print("Execution of Fit-Hi-C completed successfully. [DONE]")
+    message("Execution of Fit-Hi-C completed successfully. [DONE]")
 
     return
 }
@@ -156,7 +161,7 @@ distLowThres=-1, visual=FALSE) {
 generate_FragPairs <- function(infilename, mappabilityThreshold, distUpThres,
 distLowThres) {
 
-    print("Running generate_FragPairs method ...")
+    message("Running generate_FragPairs method ...")
 
     chr <- hitCount <- mid1 <- mid2 <- NULL
 
@@ -221,7 +226,7 @@ distLowThres) {
     }
     baselineIntraChrProb <- 1.0 / possibleIntraAllCount
 
-    print("Complete generate_FragPairs method [OK]")
+    message("Complete generate_FragPairs method [OK]")
 
     return(list(possibleInterAllCount=possibleInterAllCount,
         possibleIntraAllCount=possibleIntraAllCount,
@@ -233,7 +238,7 @@ distLowThres) {
 }
 
 read_ICE_biases <- function(infilename) {
-    print("Running read_ICE_biases method ...")
+    message("Running read_ICE_biases method ...")
 
     bias <- NULL
 
@@ -241,7 +246,7 @@ read_ICE_biases <- function(infilename) {
         col.names=c("chr", "mid", "bias")))
     biasDic <- data[bias < 0.5 | bias > 2, bias := -1]
 
-    print("Complete read_ICE_biases method [OK]")
+    message("Complete read_ICE_biases method [OK]")
 
     return(biasDic)
 }
@@ -249,7 +254,7 @@ read_ICE_biases <- function(infilename) {
 read_All_Interactions <- function(infilename, biasDic, listOfMappableFrags,
 possiblePairsPerDistance, distUpThres, distLowThres) {
 
-    print("Running read_All_Interactions method ...")
+    message("Running read_All_Interactions method ...")
 
     chr1 <- chr2 <- NULL
 
@@ -310,8 +315,7 @@ possiblePairsPerDistance, distUpThres, distLowThres) {
         intraInRange_data, by=c("chr", "mid1", "mid2", "interactionDistance"),
         all=TRUE, allow.cartesian=TRUE)
     if (temp < nrow(possiblePairsPerDistance)) {
-        print("Illegal fragment pair")
-        q()
+        stop("Illegal fragment pair")
     }
 
     hitCount_data <- possiblePairsPerDistance$hitCount
@@ -330,7 +334,7 @@ possiblePairsPerDistance, distUpThres, distLowThres) {
         hitCount=possiblePairsPerDistance$hitCount,
         bias=possiblePairsPerDistance$bias)
 
-    print("Complete read_All_Interactions method [OK]")
+    message("Complete read_All_Interactions method [OK]")
 
     return(list(sortedInteractions=
         sortedInteractions[order(sortedInteractions$interactionDistance), ],
@@ -349,7 +353,7 @@ calculate_Probabilities <- function(sortedInteractions, isOutlier, figname,
 noOfBins, useBinning, distScaling, observedIntraInRangeSum, outdir, visual,
 libname, toKb, toProb) {
 
-    print("Running calculating_Probabilities method ...")
+    message("Running calculating_Probabilities method ...")
 
     desiredPerBin <- observedIntraInRangeSum / noOfBins
 
@@ -361,8 +365,8 @@ libname, toKb, toProb) {
     }
 
     if (visual) {
-        print(paste("Plotting ", figname, ".png", sep=""))
-        png(filename=paste(outdir, "/", figname, ".png", sep=""),
+        message("Plotting ", figname, ".png")
+        png(filename=file.path(outdir, paste(figname, ".png", sep="")),
             width=800, height=600)
         titleStr <- paste(
             "Binning observed interactions using equal occupancy bins.\n",
@@ -380,17 +384,17 @@ libname, toKb, toProb) {
         dev.off()
     }
 
-    print(paste("Writing ", figname, ".txt", sep=""))
-    file.create(paste(outdir, "/", figname, ".txt", sep=""))
+    message("Writing ", figname, ".txt")
+    file.create(file.path(outdir, paste(figname, ".txt", sep="")))
     outputData <- data.table(avgGenomicDist=trunc(data$x),
         contactProbability=data$y, standardError=data$yerr,
         noOfLocusPairs=data$pairCounts,
         totalOfContactCounts=data$interactionTotals)
     write.table(format(outputData, digits=3),
-        file=paste(outdir, "/", figname, ".txt", sep=""), quote=FALSE, sep="\t",
-        row.names=FALSE, col.names=TRUE)
+        file=file.path(outdir, paste(figname, ".txt", sep="")), quote=FALSE,
+        sep="\t", row.names=FALSE, col.names=TRUE)
 
-    print("Complete calculating_Probabilities method [OK]")
+    message("Complete calculating_Probabilities method [OK]")
 
     return(data.table(x=data$x, y=data$y, yerr=data$yerr))
 }
@@ -401,7 +405,7 @@ useInters, baselineIntraChrProb, baselineInterChrProb, observedInterAllSum,
 observedIntraAllSum, observedIntraInRangeSum, possibleInterAllCount,
 possibleIntraAllCount, possibleIntraInRangeCount, maxObservedGenomicDist) {
 
-    print("Running fit_Spline method ...")
+    message("Running fit_Spline method ...")
 
     bias <- bias1 <- bias2 <- chr1 <- chr2 <- hitCount <-
         interactionDistance <- isOutlier <- p_val <- NULL
@@ -422,9 +426,9 @@ possibleIntraAllCount, possibleIntraInRangeCount, maxObservedGenomicDist) {
     }
 
     if (visual) {
-        print(paste("Plotting ", figname, ".png", sep=""))
+        message("Plotting ", figname, ".png")
 
-        png(filename=paste(outdir, "/", figname, ".png", sep=""),
+        png(filename=file.path(outdir, paste(figname, ".png", sep="")),
             width=800, height=600)
 
         par(mfrow=c(2, 1))
@@ -523,10 +527,11 @@ possibleIntraAllCount, possibleIntraInRangeCount, maxObservedGenomicDist) {
             possibleIntraInRangeCount)
     }
 
-    print(paste("Writing p-values to file ", figname, ".significances.txt.gz",
-        sep=""))
-    file.create(paste(outdir, "/", figname, ".significances.txt.gz", sep=""))
-    gz <- gzfile(paste(outdir, "/", figname, ".significances.txt.gz", sep=""))
+    message("Writing p-values to file ", figname, ".significances.txt.gz")
+    file.create(file.path(outdir,
+        paste(figname, ".significances.txt.gz", sep="")))
+    gz <- gzfile(file.path(outdir,
+        paste(figname, ".significances.txt.gz", sep="")))
     outputData <- data.table(chr1=data$chr1, fragmentMid1=data$mid1,
         chr2=data$chr2, fragmentMid2=data$mid2, contactCount=data$hitCount,
         p_value=p_vals, q_value=q_vals)
@@ -565,11 +570,11 @@ possibleIntraAllCount, possibleIntraInRangeCount, maxObservedGenomicDist) {
     aboveThresCount <- nrow(aboveData)
 
     if (visual) {
-        print(paste("Plotting results of extracting outliers to file ", figname,
-            ".extractOutliers.png", sep=""))
+        message("Plotting results of extracting outliers to file ", figname,
+            ".extractOutliers.png")
 
-        png(filename=paste(outdir, "/", figname, ".extractOutliers.png",
-            sep=""), width=800, height=600)
+        png(filename=file.path(outdir, paste(figname, ".extractOutliers.png",
+            sep="")), width=800, height=600)
 
         downsample <- 30
         randIndcsAbove <- sample(seq(1, length(intcountsAbove)),
@@ -613,8 +618,7 @@ possibleIntraAllCount, possibleIntraInRangeCount, maxObservedGenomicDist) {
     }
 
     if (visual) {
-        print(paste("Plotting q-values to file ", figname, ".qplot.png",
-            sep=""))
+        message("Plotting q-values to file ", figname, ".qplot.png")
     }
     minFDR <- 0
     maxFDR <- 0.05
@@ -622,7 +626,7 @@ possibleIntraAllCount, possibleIntraInRangeCount, maxObservedGenomicDist) {
     plot_qvalues(q_vals, minFDR, maxFDR, increment, paste(figname, ".qplot",
         sep=""), outdir, visual)
 
-    print("Complete fit_Spline method [OK]")
+    message("Complete fit_Spline method [OK]")
 
     return(tempData$isOutlier)
 }
@@ -648,7 +652,7 @@ visual) {
     }
 
     if (visual) {
-        png(filename=paste(outdir, "/", figname, ".png", sep=""),
+        png(filename=file.path(outdir, paste(figname, ".png", sep="")),
             width=800, height=600)
         plot(qvalTicks, significantTicks, type="o", pch=17, col="blue", lty=1,
             xlab="FDR threshold", ylab="Significant contacts")
