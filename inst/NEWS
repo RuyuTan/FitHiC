@@ -3,3 +3,5 @@ Fit-Hi-C
 0.99.0: Initial commit
 0.99.1: Update authors in DESCRIPTION, adjust format in vignettes, improve
     grammar in FitHiC.R
+0.99.2: With the help of @mtmorgan, re-write the method of
+    benjamini_hochberg_correction in R

@@ -670,8 +670,20 @@ bisect_left <- function(a, x) {
 }
 
 benjamini_hochberg_correction <- function(p_values, num_total_tests) {
+    stopifnot(
+        is.numeric(p_values),
+        is.wholenumber(num_total_tests), length(num_total_tests) == 1L)
+
     order <- order(p_values)
     sorted_pvals <- p_values[order]
-    return(benjamini_hochberg_correction_helper(p_values, num_total_tests,
-        sorted_pvals, order - 1))
+
+    bh_values <- ifelse(
+        sorted_pvals == 1, 1,
+        pmin(sorted_pvals * num_total_tests / seq_along(sorted_pvals), 1))
+
+    return(cummax(bh_values)[order(order)])
+}
+
+is.wholenumber <- function(x, tol=.Machine$double.eps^0.5) {
+    abs(x - round(x)) < tol
 }
