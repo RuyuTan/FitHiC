@@ -73,6 +73,6 @@ FitHiC(fragsfile, intersfile, getwd(), libname="Duan_yeast_EcoRI",
 
 }
 \author{
-Ruyu Tan, \email{tanry33@gmail.com}
+Ruyu Tan, \email{rut003@ucsd.edu}
 }
 

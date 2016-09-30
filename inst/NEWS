@@ -5,3 +5,4 @@ Fit-Hi-C
     grammar in FitHiC.R
 0.99.2: With the help of @mtmorgan, re-write the method of
     benjamini_hochberg_correction in R
+0.99.3: Update maintainer's contact information

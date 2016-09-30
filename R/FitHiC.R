@@ -42,7 +42,7 @@
 #'
 #' @return None
 #'
-#' @author Ruyu Tan, \email{tanry33@gmail.com}
+#' @author Ruyu Tan, \email{rut003@ucsd.edu}
 #'
 #' @examples
 #' fragsfile <- system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz",
