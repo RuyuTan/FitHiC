@@ -7,3 +7,5 @@ Fit-Hi-C
     benjamini_hochberg_correction in R
 0.99.3: Update maintainer's contact information
 0.99.4: Register at the BioConductor support site
+0.99.5: Remove useless function benjamini_hochberg_correction_helper, update
+    vignettes

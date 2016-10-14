@@ -21,17 +21,3 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// benjamini_hochberg_correction_helper
-NumericVector benjamini_hochberg_correction_helper(NumericVector p_values, int num_total_tests, NumericVector sorted_pvals, IntegerVector order);
-RcppExport SEXP FitHiC_benjamini_hochberg_correction_helper(SEXP p_valuesSEXP, SEXP num_total_testsSEXP, SEXP sorted_pvalsSEXP, SEXP orderSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type p_values(p_valuesSEXP);
-    Rcpp::traits::input_parameter< int >::type num_total_tests(num_total_testsSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type sorted_pvals(sorted_pvalsSEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type order(orderSEXP);
-    rcpp_result_gen = Rcpp::wrap(benjamini_hochberg_correction_helper(p_values, num_total_tests, sorted_pvals, order));
-    return rcpp_result_gen;
-END_RCPP
-}

@@ -99,40 +99,10 @@ DataFrame calculate_probabilities_helper(DataFrame sortedInteractions,
     pairCounts = pairCounts[Range(0, index - 1)];
     interactionTotals = interactionTotals[Range(0, index - 1)];
 
-    return DataFrame::create(_["x"] = x,
+    return DataFrame::create(
+        _["x"] = x,
         _["y"] = y,
         _["yerr"] = yerr,
         _["pairCounts"] = pairCounts,
         _["interactionTotals"] = interactionTotals);
-}
-
-// [[Rcpp::export]]
-NumericVector benjamini_hochberg_correction_helper(NumericVector p_values,
-    int num_total_tests, NumericVector sorted_pvals, IntegerVector order) {
-
-    int size = p_values.size();
-    NumericVector q_values(size);
-
-    int i = 0;
-    double prev_bh_value = 0;
-
-    while(i < size) {
-        double p_value = sorted_pvals[i];
-        double bh_value;
-
-        if (p_value == 1) {
-            bh_value = 1;
-        } else {
-            bh_value = p_value * num_total_tests / (i + 1);
-            bh_value = fmin(bh_value, 1);
-        }
-
-        bh_value = fmax(bh_value, prev_bh_value);
-        prev_bh_value = bh_value;
-        q_values[order[i]] = bh_value;
-
-        i += 1;
-    }
-
-    return q_values;
 }

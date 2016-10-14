@@ -10,6 +10,7 @@ vignette: >
 ---
 
 ## Introduction
+
 [Fit-Hi-C](https://noble.gs.washington.edu/proj/fit-hi-c/) is a tool for
 assigning statistical confidence estimates to intra-chromosomal contact maps
 produced by genome-wide genome architecture assays such as Hi-C. Compared to
@@ -20,7 +21,36 @@ logic in C/C++
 - Fit-Hi-C R package is easy to use for those familiar with R language without
 additional configuration
 
-## Data Preparation
+## Install FitHiC
+
+To install this package, start R and enter
+
+```
+## try http:// if https:// URLs are not supported
+source("https://bioconductor.org/biocLite.R")
+biocLite("FitHiC")
+```
+
+There are two ways to retrieve development versions
+
+* To get the latest development version, start R and enter
+
+```
+## try http:// if https:// URLs are not supported
+source("https://bioconductor.org/biocLite.R")
+biocLite("BiocInstaller")
+useDevel()
+biocLite("FitHiC")
+```
+
+* To get a specified development version `x.y.z`, open a terminal and enter
+
+```
+wget http://bioconductor.org/packages/devel/bioc/src/contrib/FitHiC_x.y.z.tar.gz .
+R CMD INSTALL FitHiC_x.y.z.tar.gz
+```
+
+## Prepare Data
 
 Before running Fit-Hi-C, two input files should be prepared.
 

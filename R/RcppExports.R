@@ -5,7 +5,3 @@ calculate_probabilities_helper <- function(sortedInteractions, isOutlier, useBin
     .Call('C_FitHiC_calculate_probabilities_helper', PACKAGE = 'FitHiC', sortedInteractions, isOutlier, useBinning, desiredPerBin, distScaling, observedIntraInRangeSum)
 }
 
-benjamini_hochberg_correction_helper <- function(p_values, num_total_tests, sorted_pvals, order) {
-    .Call('C_FitHiC_benjamini_hochberg_correction_helper', PACKAGE = 'FitHiC', p_values, num_total_tests, sorted_pvals, order)
-}
-
