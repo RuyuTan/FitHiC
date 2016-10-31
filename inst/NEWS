@@ -9,3 +9,5 @@ Fit-Hi-C
 0.99.4: Register at the BioConductor support site
 0.99.5: Remove useless function benjamini_hochberg_correction_helper, update
     vignettes
+1.1.1: Add more examples in Fit-Hi-C manual and vignettes, update contact
+    information

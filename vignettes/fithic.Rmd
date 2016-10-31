@@ -183,11 +183,88 @@ If `visual` is set to TRUE, corresponding images will be also outputed:
 ![](Duan_yeast_EcoRI.spline_pass1.extractOutliers.png)
 ![](Duan_yeast_EcoRI.spline_pass1.qplot.png)
 
+## More Examples
+
+```{r, eval=FALSE}
+library("FitHiC")
+fragsfile <- system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz",
+    package = "FitHiC")
+intersfile <- system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz",
+    package = "FitHiC")
+outdir <- file.path(getwd(), "Duan_yeast_EcoRI")
+FitHiC(fragsfile, intersfile, outdir, libname="Duan_yeast_EcoRI",
+    distUpThres=250000, distLowThres=10000)
+
+fragsfile <- system.file("extdata", "fragmentLists/Duan_yeast_HindIII.gz",
+    package = "FitHiC")
+intersfile <- system.file("extdata", "contactCounts/Duan_yeast_HindIII.gz",
+    package = "FitHiC")
+outdir <- file.path(getwd(), "Duan_yeast_HindIII")
+FitHiC(fragsfile, intersfile, outdir, libname="Duan_yeast_HindIII",
+    distUpThres=250000, distLowThres=10000)
+```
+
+```{r, eval=FALSE}
+library("FitHiC")
+fragsfile <- system.file("extdata",
+    "fragmentLists/Dixon_hESC_HindIII_hg18_combineFrags10_chr1.gz",
+    package = "FitHiC")
+intersfile <- system.file("extdata",
+    "contactCounts/Dixon_hESC_HindIII_hg18_combineFrags10_chr1.gz",
+    package = "FitHiC")
+outdir <- file.path(getwd(), "Dixon_hESC_HindIII_hg18_combineFrags10_chr1")
+FitHiC(fragsfile, intersfile, outdir,
+    libname="Dixon_hESC_HindIII_hg18_combineFrags10_chr1", noOfBins=200,
+    distUpThres=5000000, distLowThres=50000)
+
+fragsfile <- system.file("extdata",
+    "fragmentLists/Dixon_mESC_HindIII_mm9_combineFrags10_chr1.gz",
+    package = "FitHiC")
+intersfile <- system.file("extdata",
+    "contactCounts/Dixon_mESC_HindIII_mm9_combineFrags10_chr1.gz",
+    package = "FitHiC")
+outdir <- file.path(getwd(), "Dixon_mESC_HindIII_mm9_combineFrags10_chr1")
+FitHiC(fragsfile, intersfile, outdir,
+    libname="Dixon_mESC_HindIII_mm9_combineFrags10_chr1", noOfBins=200,
+    distUpThres=5000000, distLowThres=50000)
+```
+
+```{r, eval=FALSE}
+library("FitHiC")
+fragsfile <- system.file("extdata",
+    "fragmentLists/Dixon_hESC_HindIII_hg18_w40000_chr1.gz",
+    package = "FitHiC")
+intersfile <- system.file("extdata",
+    "contactCounts/Dixon_hESC_HindIII_hg18_w40000_chr1.gz",
+    package = "FitHiC")
+outdir <- file.path(getwd(), "Dixon_hESC_HindIII_hg18_w40000_chr1")
+FitHiC(fragsfile, intersfile, outdir,
+    libname="Dixon_hESC_HindIII_hg18_w40000_chr1", noOfBins=50,
+    distUpThres=5000000, distLowThres=50000)
+```
+
+```{r, eval=FALSE}
+library("FitHiC")
+fragsfile <- system.file("extdata",
+    "fragmentLists/Dixon_hESC_HindIII_hg18_w40000_chr1.gz",
+    package = "FitHiC")
+intersfile <- system.file("extdata",
+    "contactCounts/Dixon_hESC_HindIII_hg18_w40000_chr1.gz",
+    package = "FitHiC")
+outdir <- file.path(getwd(), "Dixon_hESC_HindIII_hg18_w40000_chr1.afterICE")
+biasfile <- system.file("extdata",
+    "biasPerLocus/Dixon_hESC_HindIII_hg18_w40000_chr1.gz",
+    package = "FitHiC")
+FitHiC(fragsfile, intersfile, outdir, biasfile,
+    libname="Dixon_hESC_HindIII_hg18_w40000_chr1", noOfBins=50,
+    distUpThres=5000000, distLowThres=50000)
+```
+
 ## Support
 
 For questions about the use of Fit-Hi-C method, to request pre-processed Hi-C
 data or additional features and scripts, or to report bugs and provide feedback
 please e-mail Ferhat Ay.
 
-[Ferhat Ay](http://noble.gs.washington.edu/~ferhatay)
-\<ferhatay at uw period edu\>
+[Ferhat Ay](http://www.lji.org/faculty-research/labs/ay)
+\<ferhatay at lji dot org\>

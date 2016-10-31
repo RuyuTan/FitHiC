@@ -49,8 +49,64 @@
 #'     package = "FitHiC")
 #' intersfile <- system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz",
 #'     package = "FitHiC")
-#' FitHiC(fragsfile, intersfile, getwd(), libname="Duan_yeast_EcoRI",
-#'     distUpThres=250000, distLowThres=10000, visual=TRUE)
+#' outdir <- file.path(getwd(), "Duan_yeast_EcoRI")
+#' FitHiC(fragsfile, intersfile, outdir, libname="Duan_yeast_EcoRI",
+#'     distUpThres=250000, distLowThres=10000)
+#'
+#' fragsfile <- system.file("extdata", "fragmentLists/Duan_yeast_HindIII.gz",
+#'     package = "FitHiC")
+#' intersfile <- system.file("extdata", "contactCounts/Duan_yeast_HindIII.gz",
+#'     package = "FitHiC")
+#' outdir <- file.path(getwd(), "Duan_yeast_HindIII")
+#' FitHiC(fragsfile, intersfile, outdir, libname="Duan_yeast_HindIII",
+#'     distUpThres=250000, distLowThres=10000)
+#'
+#' fragsfile <- system.file("extdata",
+#'     "fragmentLists/Dixon_hESC_HindIII_hg18_combineFrags10_chr1.gz",
+#'     package = "FitHiC")
+#' intersfile <- system.file("extdata",
+#'     "contactCounts/Dixon_hESC_HindIII_hg18_combineFrags10_chr1.gz",
+#'     package = "FitHiC")
+#' outdir <- file.path(getwd(), "Dixon_hESC_HindIII_hg18_combineFrags10_chr1")
+#' FitHiC(fragsfile, intersfile, outdir,
+#'     libname="Dixon_hESC_HindIII_hg18_combineFrags10_chr1", noOfBins=200,
+#'     distUpThres=5000000, distLowThres=50000)
+#'
+#' fragsfile <- system.file("extdata",
+#'     "fragmentLists/Dixon_mESC_HindIII_mm9_combineFrags10_chr1.gz",
+#'     package = "FitHiC")
+#' intersfile <- system.file("extdata",
+#'     "contactCounts/Dixon_mESC_HindIII_mm9_combineFrags10_chr1.gz",
+#'     package = "FitHiC")
+#' outdir <- file.path(getwd(), "Dixon_mESC_HindIII_mm9_combineFrags10_chr1")
+#' FitHiC(fragsfile, intersfile, outdir,
+#'     libname="Dixon_mESC_HindIII_mm9_combineFrags10_chr1", noOfBins=200,
+#'     distUpThres=5000000, distLowThres=50000)
+#'
+#' fragsfile <- system.file("extdata",
+#'     "fragmentLists/Dixon_hESC_HindIII_hg18_w40000_chr1.gz",
+#'     package = "FitHiC")
+#' intersfile <- system.file("extdata",
+#'     "contactCounts/Dixon_hESC_HindIII_hg18_w40000_chr1.gz",
+#'     package = "FitHiC")
+#' outdir <- file.path(getwd(), "Dixon_hESC_HindIII_hg18_w40000_chr1")
+#' FitHiC(fragsfile, intersfile, outdir,
+#'     libname="Dixon_hESC_HindIII_hg18_w40000_chr1", noOfBins=50,
+#'     distUpThres=5000000, distLowThres=50000)
+#'
+#' fragsfile <- system.file("extdata",
+#'     "fragmentLists/Dixon_hESC_HindIII_hg18_w40000_chr1.gz",
+#'     package = "FitHiC")
+#' intersfile <- system.file("extdata",
+#'     "contactCounts/Dixon_hESC_HindIII_hg18_w40000_chr1.gz",
+#'     package = "FitHiC")
+#' outdir <- file.path(getwd(), "Dixon_hESC_HindIII_hg18_w40000_chr1.afterICE")
+#' biasfile <- system.file("extdata",
+#'     "biasPerLocus/Dixon_hESC_HindIII_hg18_w40000_chr1.gz",
+#'     package = "FitHiC")
+#' FitHiC(fragsfile, intersfile, outdir, biasfile,
+#'     libname="Dixon_hESC_HindIII_hg18_w40000_chr1", noOfBins=50,
+#'     distUpThres=5000000, distLowThres=50000)
 #'
 #' @import data.table
 #' @import fdrtool
