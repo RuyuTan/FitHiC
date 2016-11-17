@@ -2,7 +2,10 @@
 title: "How to Use Fit-Hi-C R Package"
 author: "Ruyu Tan"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+    html_document:
+        toc: true
+        toc_float: true
 vignette: >
     %\VignetteIndexEntry{Vignette Title}
     %\VignetteEngine{knitr::rmarkdown}
@@ -31,82 +34,11 @@ source("https://bioconductor.org/biocLite.R")
 biocLite("FitHiC")
 ```
 
-There are two ways to retrieve development versions
+## Example I: run yeast data
 
-* To get the latest development version, start R and enter
+__Duan_yeast_EcoRI__
 
-```
-## try http:// if https:// URLs are not supported
-source("https://bioconductor.org/biocLite.R")
-biocLite("BiocInstaller")
-useDevel()
-biocLite("FitHiC")
-```
-
-* To get a specified development version `x.y.z`, open a terminal and enter
-
-```
-wget http://bioconductor.org/packages/devel/bioc/src/contrib/FitHiC_x.y.z.tar.gz .
-R CMD INSTALL FitHiC_x.y.z.tar.gz
-```
-
-## Prepare Data
-
-Before running Fit-Hi-C, two input files should be prepared.
-
-* __FRAGSFILE__ This file stores the information about midpoints (or start
-indices) of the fragments. It should consist of 5 columns: first column stands
-for chromosome name; third column stands for the midPoint; fourth column stands
-for the hitCount; second column and fifth column can be arbitrary.
-
-```{r fragsfile, echo = FALSE, results = "asis"}
-fragsfile <- system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz",
-    package = "FitHiC")
-data <- read.table(gzfile(fragsfile), header=FALSE,
-    col.names=c("Chromosome Name", "Column 2", "Mid Point", "Hit Count",
-    "Column 5"))
-knitr::kable(head(data, n=6L), align = "crrrr", caption="FRAGSFILE")
-```
-
-* __INTERSFILE__ This file stores the information about interactions between
-fragment pairs. It should consist of 5 columns: first column and third column
-stand for the chromosome names of the fragment pair; second column and fourth
-column stand for midPoints of the fragment pair; fifth column stands for
-hitCount.
-
-```{r intersfile, echo=FALSE, results="asis"}
-intersfile <- system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz",
-    package = "FitHiC")
-data <- read.table(gzfile(intersfile), header=FALSE,
-    col.names=c("Chromosome1 Name", "Mid Point 1", "Chromosome2 Name",
-    "Mid Point 2", "Hit Count"))
-knitr::kable(head(data, n=6L), align = "crcrr", caption="INTERSFILE")
-```
-
-Besides, __OUTDIR__, the path where the output files will be stored, is also
-required to be specified.
-
-## Run Fit-Hi-C
-
-After the input data is well prepared, you can easily run Fit-Hi-C in R as:
-
-```{r, eval=FALSE}
-library("FitHiC")
-FitHiC(FRAGSFILE, INTERSFILE, OUTDIR, ...)
-```
-
-If you want to output images simultaneously, explicitly set `visual` to TRUE:
-
-```{r, eval=FALSE}
-library("FitHiC")
-FitHiC(FRAGSFILE, INTERSFILE, OUTDIR, ..., visual=TRUE)
-```
-
-## Examples
-
-The pre-processed Hi-C data is from Yeast - EcoRI ^[Duan Z, et al. 2010. A
-three-dimensional model of the yeast genome. Nature 465: 363–367.]. _FRAGSFILE_
-and _INTERSFILE_ are located in `system.file("extdata",
+_FRAGSFILE_ and _INTERSFILE_ are located in `system.file("extdata",
 "fragmentLists/Duan_yeast_EcoRI.gz", package = "FitHiC")` and `system.file(
 "extdata", "contactCounts/Duan_yeast_EcoRI.gz", package = "FitHiC")`,
 respectively. When input data is ready, run as follows:
@@ -117,7 +49,8 @@ fragsfile <- system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz",
     package = "FitHiC")
 intersfile <- system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz",
     package = "FitHiC")
-FitHiC(fragsfile, intersfile, getwd(), libname="Duan_yeast_EcoRI",
+outdir <- file.path(getwd(), "Duan_yeast_EcoRI")
+FitHiC(fragsfile, intersfile, outdir, libname="Duan_yeast_EcoRI",
     distUpThres=250000, distLowThres=10000)
 ```
 
@@ -132,7 +65,8 @@ fragsfile <- system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz",
     package = "FitHiC")
 intersfile <- system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz",
     package = "FitHiC")
-FitHiC(fragsfile, intersfile, getwd(), libname="Duan_yeast_EcoRI",
+outdir <- file.path(getwd(), "Duan_yeast_EcoRI")
+FitHiC(fragsfile, intersfile, outdir, libname="Duan_yeast_EcoRI",
     distUpThres=250000, distLowThres=10000)
 ```
 
@@ -142,7 +76,8 @@ fragsfile <- system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz",
     package = "FitHiC")
 intersfile <- system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz",
     package = "FitHiC")
-FitHiC(fragsfile, intersfile, getwd(), libname="Duan_yeast_EcoRI",
+outdir <- file.path(getwd(), "Duan_yeast_EcoRI")
+FitHiC(fragsfile, intersfile, outdir, libname="Duan_yeast_EcoRI",
     distUpThres=250000, distLowThres=10000, visual=TRUE)
 ```
 
@@ -151,11 +86,13 @@ The output files come from two internal methods called by Fit-Hi-C.
 * __calculate_Probabilites__
 
 ```{r calculate-probabilities, echo=FALSE, results="asis"}
-output <- file.path(getwd(), "Duan_yeast_EcoRI.fithic_pass1.txt")
+output <- file.path(getwd(), "Duan_yeast_EcoRI",
+    "Duan_yeast_EcoRI.fithic_pass1.txt")
 data <- read.table(output, header=TRUE)
 knitr::kable(head(data, n=6L), caption="Duan_yeast_EcoRI.fithic_pass1.txt")
 
-output <- file.path(getwd(), "Duan_yeast_EcoRI.fithic_pass2.txt")
+output <- file.path(getwd(), "Duan_yeast_EcoRI",
+    "Duan_yeast_EcoRI.fithic_pass2.txt")
 data <- read.table(output, header=TRUE)
 knitr::kable(head(data, n=6L), caption="Duan_yeast_EcoRI.fithic_pass2.txt")
 ```
@@ -163,13 +100,13 @@ knitr::kable(head(data, n=6L), caption="Duan_yeast_EcoRI.fithic_pass2.txt")
 * __fit_Spline__
 
 ```{r fit-spline, echo=FALSE, results="asis"}
-output <- file.path(getwd(),
+output <- file.path(getwd(), "Duan_yeast_EcoRI",
     "Duan_yeast_EcoRI.spline_pass1.significances.txt.gz")
 data <- read.table(gzfile(output), header=TRUE)
 knitr::kable(head(data, n=6L), align="crcrrrr",
     caption="Duan_yeast_EcoRI.spline_pass1.significances.txt.gz")
 
-output <- file.path(getwd(),
+output <- file.path(getwd(), "Duan_yeast_EcoRI",
     "Duan_yeast_EcoRI.spline_pass2.significances.txt.gz")
 data <- read.table(gzfile(output), header=TRUE)
 knitr::kable(head(data, n=6L), align="crcrrrr",
@@ -178,23 +115,17 @@ knitr::kable(head(data, n=6L), align="crcrrrr",
 
 If `visual` is set to TRUE, corresponding images will be also outputed:
 
-![](Duan_yeast_EcoRI.fithic_pass1.png)
-![](Duan_yeast_EcoRI.spline_pass1.png)
-![](Duan_yeast_EcoRI.spline_pass1.extractOutliers.png)
-![](Duan_yeast_EcoRI.spline_pass1.qplot.png)
++-------------------------------------------------------------------------+---------------------------------------------------------------+
+| ![](Duan_yeast_EcoRI/Duan_yeast_EcoRI.fithic_pass1.png)                 | ![](Duan_yeast_EcoRI/Duan_yeast_EcoRI.spline_pass1.png)       |
++-------------------------------------------------------------------------+---------------------------------------------------------------+
+| ![](Duan_yeast_EcoRI/Duan_yeast_EcoRI.spline_pass1.extractOutliers.png) | ![](Duan_yeast_EcoRI/Duan_yeast_EcoRI.spline_pass1.qplot.png) |
++-------------------------------------------------------------------------+---------------------------------------------------------------+
 
-## More Examples
+__Duan_yeast_HindIII__
 
-```{r, eval=FALSE}
-library("FitHiC")
-fragsfile <- system.file("extdata", "fragmentLists/Duan_yeast_EcoRI.gz",
-    package = "FitHiC")
-intersfile <- system.file("extdata", "contactCounts/Duan_yeast_EcoRI.gz",
-    package = "FitHiC")
-outdir <- file.path(getwd(), "Duan_yeast_EcoRI")
-FitHiC(fragsfile, intersfile, outdir, libname="Duan_yeast_EcoRI",
-    distUpThres=250000, distLowThres=10000)
+Similarly, Duan_yeast_HindIII can be run as follows:
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results="hide"}
 fragsfile <- system.file("extdata", "fragmentLists/Duan_yeast_HindIII.gz",
     package = "FitHiC")
 intersfile <- system.file("extdata", "contactCounts/Duan_yeast_HindIII.gz",
@@ -204,32 +135,9 @@ FitHiC(fragsfile, intersfile, outdir, libname="Duan_yeast_HindIII",
     distUpThres=250000, distLowThres=10000)
 ```
 
-```{r, eval=FALSE}
-library("FitHiC")
-fragsfile <- system.file("extdata",
-    "fragmentLists/Dixon_hESC_HindIII_hg18_combineFrags10_chr1.gz",
-    package = "FitHiC")
-intersfile <- system.file("extdata",
-    "contactCounts/Dixon_hESC_HindIII_hg18_combineFrags10_chr1.gz",
-    package = "FitHiC")
-outdir <- file.path(getwd(), "Dixon_hESC_HindIII_hg18_combineFrags10_chr1")
-FitHiC(fragsfile, intersfile, outdir,
-    libname="Dixon_hESC_HindIII_hg18_combineFrags10_chr1", noOfBins=200,
-    distUpThres=5000000, distLowThres=50000)
+## Example II: run human data - fixed size windows (40kb)
 
-fragsfile <- system.file("extdata",
-    "fragmentLists/Dixon_mESC_HindIII_mm9_combineFrags10_chr1.gz",
-    package = "FitHiC")
-intersfile <- system.file("extdata",
-    "contactCounts/Dixon_mESC_HindIII_mm9_combineFrags10_chr1.gz",
-    package = "FitHiC")
-outdir <- file.path(getwd(), "Dixon_mESC_HindIII_mm9_combineFrags10_chr1")
-FitHiC(fragsfile, intersfile, outdir,
-    libname="Dixon_mESC_HindIII_mm9_combineFrags10_chr1", noOfBins=200,
-    distUpThres=5000000, distLowThres=50000)
-```
-
-```{r, eval=FALSE}
+```{r, message=FALSE, warning=FALSE, results="hide"}
 library("FitHiC")
 fragsfile <- system.file("extdata",
     "fragmentLists/Dixon_hESC_HindIII_hg18_w40000_chr1.gz",
@@ -240,10 +148,60 @@ intersfile <- system.file("extdata",
 outdir <- file.path(getwd(), "Dixon_hESC_HindIII_hg18_w40000_chr1")
 FitHiC(fragsfile, intersfile, outdir,
     libname="Dixon_hESC_HindIII_hg18_w40000_chr1", noOfBins=50,
-    distUpThres=5000000, distLowThres=50000)
+    distUpThres=5000000, distLowThres=50000, visual=TRUE)
 ```
 
-```{r, eval=FALSE}
++---------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| ![](Dixon_hESC_HindIII_hg18_w40000_chr1/Dixon_hESC_HindIII_hg18_w40000_chr1.fithic_pass1.png)                 | ![](Dixon_hESC_HindIII_hg18_w40000_chr1/Dixon_hESC_HindIII_hg18_w40000_chr1.spline_pass1.png)       |
++---------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| ![](Dixon_hESC_HindIII_hg18_w40000_chr1/Dixon_hESC_HindIII_hg18_w40000_chr1.spline_pass1.extractOutliers.png) | ![](Dixon_hESC_HindIII_hg18_w40000_chr1/Dixon_hESC_HindIII_hg18_w40000_chr1.spline_pass1.qplot.png) |
++---------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+
+## Example III: run human data - RE fragment resolution (10RE)
+
+```{r, message=FALSE, warning=FALSE, results="hide"}
+library("FitHiC")
+fragsfile <- system.file("extdata",
+    "fragmentLists/Dixon_hESC_HindIII_hg18_combineFrags10_chr1.gz",
+    package = "FitHiC")
+intersfile <- system.file("extdata",
+    "contactCounts/Dixon_hESC_HindIII_hg18_combineFrags10_chr1.gz",
+    package = "FitHiC")
+outdir <- file.path(getwd(), "Dixon_hESC_HindIII_hg18_combineFrags10_chr1")
+FitHiC(fragsfile, intersfile, outdir,
+    libname="Dixon_hESC_HindIII_hg18_combineFrags10_chr1", noOfBins=200,
+    distUpThres=5000000, distLowThres=50000, visual=TRUE)
+```
+
++-------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| ![](Dixon_hESC_HindIII_hg18_combineFrags10_chr1/Dixon_hESC_HindIII_hg18_combineFrags10_chr1.fithic_pass1.png)                 | ![](Dixon_hESC_HindIII_hg18_combineFrags10_chr1/Dixon_hESC_HindIII_hg18_combineFrags10_chr1.spline_pass1.png)       |
++-------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| ![](Dixon_hESC_HindIII_hg18_combineFrags10_chr1/Dixon_hESC_HindIII_hg18_combineFrags10_chr1.spline_pass1.extractOutliers.png) | ![](Dixon_hESC_HindIII_hg18_combineFrags10_chr1/Dixon_hESC_HindIII_hg18_combineFrags10_chr1.spline_pass1.qplot.png) |
++-------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+
+```{r, message=FALSE, warning=FALSE, results="hide"}
+library("FitHiC")
+fragsfile <- system.file("extdata",
+    "fragmentLists/Dixon_mESC_HindIII_mm9_combineFrags10_chr1.gz",
+    package = "FitHiC")
+intersfile <- system.file("extdata",
+    "contactCounts/Dixon_mESC_HindIII_mm9_combineFrags10_chr1.gz",
+    package = "FitHiC")
+outdir <- file.path(getwd(), "Dixon_mESC_HindIII_mm9_combineFrags10_chr1")
+FitHiC(fragsfile, intersfile, outdir,
+    libname="Dixon_mESC_HindIII_mm9_combineFrags10_chr1", noOfBins=200,
+    distUpThres=5000000, distLowThres=50000, visual=TRUE)
+```
+
++-----------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| ![](Dixon_mESC_HindIII_mm9_combineFrags10_chr1/Dixon_mESC_HindIII_mm9_combineFrags10_chr1.fithic_pass1.png)                 | ![](Dixon_mESC_HindIII_mm9_combineFrags10_chr1/Dixon_mESC_HindIII_mm9_combineFrags10_chr1.spline_pass1.png)       |
++-----------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| ![](Dixon_mESC_HindIII_mm9_combineFrags10_chr1/Dixon_mESC_HindIII_mm9_combineFrags10_chr1.spline_pass1.extractOutliers.png) | ![](Dixon_mESC_HindIII_mm9_combineFrags10_chr1/Dixon_mESC_HindIII_mm9_combineFrags10_chr1.spline_pass1.qplot.png) |
++-----------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+
+## Example IV: run normalized human data - fixed size windows
+
+```{r, message=FALSE, warning=FALSE, results="hide"}
 library("FitHiC")
 fragsfile <- system.file("extdata",
     "fragmentLists/Dixon_hESC_HindIII_hg18_w40000_chr1.gz",
@@ -257,8 +215,70 @@ biasfile <- system.file("extdata",
     package = "FitHiC")
 FitHiC(fragsfile, intersfile, outdir, biasfile,
     libname="Dixon_hESC_HindIII_hg18_w40000_chr1", noOfBins=50,
-    distUpThres=5000000, distLowThres=50000)
+    distUpThres=5000000, distLowThres=50000, visual=TRUE)
 ```
+
++------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| ![](Dixon_hESC_HindIII_hg18_w40000_chr1.afterICE/Dixon_hESC_HindIII_hg18_w40000_chr1.fithic_pass1.png)                 | ![](Dixon_hESC_HindIII_hg18_w40000_chr1.afterICE/Dixon_hESC_HindIII_hg18_w40000_chr1.spline_pass1.png)       |
++------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+| ![](Dixon_hESC_HindIII_hg18_w40000_chr1.afterICE/Dixon_hESC_HindIII_hg18_w40000_chr1.spline_pass1.extractOutliers.png) | ![](Dixon_hESC_HindIII_hg18_w40000_chr1.afterICE/Dixon_hESC_HindIII_hg18_w40000_chr1.spline_pass1.qplot.png) |
++------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
+
+## Prepare Data
+
+Before running Fit-Hi-C, two input files should be prepared.
+
+* __FRAGSFILE__ This file stores the information about midpoints (or start
+indices) of the fragments. It should consist of 5 columns: first column stands
+for chromosome name; third column stands for the midPoint; fourth column stands
+for the hitCount; second column and fifth column will be ignored so you can set
+them to 0. HitCount is only used for filtering in conjuction with the
+"mappabilityThreshold" option. By default setting bins to be filtered to "0" and
+those to be considered the "1" and "-m1" is enough. You do not need to compute
+hitCount unless you will explicitly filter using a custom threshold set by
+"mappabilityThreshold" option.
+
+```{r fragsfile, echo = FALSE, results = "asis"}
+fragsfile <- system.file("extdata",
+    "fragmentLists/Dixon_hESC_HindIII_hg18_w40000_chr1.gz", package = "FitHiC")
+data <- read.table(gzfile(fragsfile), header=FALSE,
+    col.names=c("Chromosome Name", "Column 2", "Mid Point", "Hit Count",
+    "Column 5"))
+knitr::kable(head(data, n=6L), align = "crrrr", caption="FRAGSFILE")
+```
+
+* __INTERSFILE__ This file stores the information about interactions between
+fragment pairs. It should consist of 5 columns: first column and third column
+stand for the chromosome names of the fragment pair; second column and fourth
+column stand for midPoints of the fragment pair; fifth column stands for
+hitCount. Make sure that midpoints in this file match those in fragsfile and in
+biasfile (when normalization is applied).
+
+```{r intersfile, echo=FALSE, results="asis"}
+intersfile <- system.file("extdata",
+    "contactCounts/Dixon_hESC_HindIII_hg18_w40000_chr1.gz", package = "FitHiC")
+data <- read.table(gzfile(intersfile), header=FALSE,
+    col.names=c("Chromosome1 Name", "Mid Point 1", "Chromosome2 Name",
+    "Mid Point 2", "Hit Count"))
+knitr::kable(head(data, n=6L), align = "crcrr", caption="INTERSFILE")
+```
+
+* __BIASFILE__ FitHiC works with matrix balancing ... normalization(ICE, KR,
+VC). These methods provide a bias value per bin/locus with 
+bias = 1 (average)
+bias > 1 (higher than expected count)
+bias < 1 (lower than expected count)
+
+```{r biasfile, echo=FALSE, results="asis"}
+biasfile <- system.file("extdata",
+    "biasPerLocus/Dixon_hESC_HindIII_hg18_w40000_chr1.gz", package = "FitHiC")
+data <- read.table(gzfile(biasfile), header=FALSE,
+    col.names=c("Chromosome Name", "Mid Point", "Bias"))
+knitr::kable(head(data, n=6L), align = "crr", caption="BIASFILE")
+```
+
+Besides, __OUTDIR__, the path where the output files will be stored, is also
+required to be specified.
 
 ## Support
 
