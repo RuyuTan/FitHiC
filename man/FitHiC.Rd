@@ -6,7 +6,8 @@
 \usage{
 FitHiC(fragsfile, intersfile, outdir, biasfile = "none", noOfPasses = 1,
   noOfBins = 100, mappabilityThreshold = 1, libname = "",
-  distUpThres = -1, distLowThres = -1, visual = FALSE)
+  distUpThres = -1, distLowThres = -1, visual = FALSE,
+  useHiCPro = FALSE)
 }
 \arguments{
 \item{fragsfile}{The path specifies where FRAGSFILE is located in the
@@ -54,6 +55,8 @@ DEFAULT is empty.}
 (unit: base pairs). DEFAULT is no limit.}
 
 \item{visual}{Use this flag for generating plots. DEFAULT is False.}
+
+\item{useHiCPro}{Whether to use HiC-Pro preprocessed data. DEFAULT is False.}
 }
 \value{
 None

@@ -39,6 +39,7 @@
 #' @param distLowThres Lower bound on the intra-chromosomal distance range
 #'                     (unit: base pairs). DEFAULT is no limit.
 #' @param visual Use this flag for generating plots. DEFAULT is False.
+#' @param useHiCPro Whether to use HiC-Pro preprocessed data. DEFAULT is False.
 #'
 #' @return None
 #'
@@ -119,7 +120,7 @@
 #' @export
 FitHiC <- function(fragsfile, intersfile, outdir, biasfile="none", noOfPasses=1,
 noOfBins=100, mappabilityThreshold=1, libname="", distUpThres=-1,
-distLowThres=-1, visual=FALSE) {
+distLowThres=-1, visual=FALSE, useHiCPro=FALSE) {
 
     distScaling <- 10000.0
     toKb <- 10^-3
@@ -138,8 +139,10 @@ distLowThres=-1, visual=FALSE) {
 
     message("Fit-Hi-C is processing ...")
 
-    r1 <- generate_FragPairs(fragsfile, mappabilityThreshold, distUpThres,
-        distLowThres)
+    fragsData <- parse_Fragsfile(fragsfile, mappabilityThreshold, useHiCPro)
+    intersData <- parse_Intersfile(intersfile, fragsData, useHiCPro)
+
+    r1 <- generate_FragPairs(fragsData, distUpThres, distLowThres)
 
     possibleInterAllCount <- r1[["possibleInterAllCount"]]
     possibleIntraAllCount <- r1[["possibleIntraAllCount"]]
@@ -157,7 +160,7 @@ distLowThres=-1, visual=FALSE) {
         biasDic <- read_ICE_biases(biasfile)
     }
 
-    r2 <- read_All_Interactions(intersfile, biasDic, listOfMappableFrags,
+    r2 <- read_All_Interactions(intersData, biasDic, listOfMappableFrags,
         possiblePairsPerDistance, distUpThres, distLowThres)
 
     sortedInteractions <- r2[["sortedInteractions"]]
@@ -181,7 +184,7 @@ distLowThres=-1, visual=FALSE) {
         distScaling, observedIntraInRangeSum, outdir, visual, libname, toKb,
         toProb)
 
-    isOutlier <- fit_Spline(tempData$x, tempData$y, tempData$yerr, intersfile,
+    isOutlier <- fit_Spline(tempData$x, tempData$y, tempData$yerr, intersData,
         sortedInteractions, biasDic, paste(libname, ".spline_pass1", sep=""),
         1, outdir, visual, distLowThres, distUpThres, toKb, toProb, useInters,
         baselineIntraChrProb, baselineInterChrProb, observedInterAllSum,
@@ -200,7 +203,7 @@ distLowThres=-1, visual=FALSE) {
             toKb, toProb)
 
         isOutlier <- fit_Spline(tempData$x, tempData$y, tempData$yerr,
-            intersfile, sortedInteractions, biasDic,
+            intersData, sortedInteractions, biasDic,
             paste(libname, ".spline_pass", i, sep=""), i, outdir, visual,
             distLowThres, distUpThres, toKb, toProb, useInters,
             baselineIntraChrProb, baselineInterChrProb, observedInterAllSum,
@@ -214,12 +217,96 @@ distLowThres=-1, visual=FALSE) {
     return
 }
 
-generate_FragPairs <- function(infilename, mappabilityThreshold, distUpThres,
-distLowThres) {
+# return data.table with column chr, mid and index
+parse_Fragsfile <- function(infilename, mappabilityThreshold, useHiCPro) {
+
+    message("Running parse_Fragsfile method ...")
+
+    data <- hitCount <- NULL
+
+    if (useHiCPro) {
+        stopifnot(endsWith(infilename, ".bed.gz") ||
+            endsWith(infilename, ".bed"))
+        # read the bed file
+        if (endsWith(infilename, ".bed.gz")) {
+            data <- data.table(read.table(gzfile(infilename), header=FALSE,
+                col.names=c("chr", "start", "end", "index")))
+        } else if (endsWith(infilename, ".bed")) {
+            data <- data.table(read.table(infilename, header=FALSE,
+                col.names=c("chr", "start", "end", "index")))
+        }
+        data <- data.table(chr=data$chr, mid=(data$start + data$end) / 2,
+            index=data$index)
+    } else {
+        # read the fragments file
+        if (endsWith(infilename, ".gz")) {
+            data <- data.table(read.table(gzfile(infilename), header=FALSE,
+                col.names=c("chr", "C2", "mid", "hitCount", "C5")))
+        } else {
+            data <- data.table(read.table(infilename, header=FALSE,
+                col.names=c("chr", "C2", "mid", "hitCount", "C5")))
+        }
+        data <- subset(data, hitCount >= mappabilityThreshold)
+        data <- data.table(chr=data$chr, mid=data$mid,
+            index=seq(1, nrow(data), 1))
+    }
+
+    message("Complete parse_Fragsfile method [OK]")
+
+    return(data)
+}
+
+# return data.table with column chr1, mid1, chr2, mid2 and hitCount
+parse_Intersfile <- function(infilename, fragsData, useHiCPro) {
+
+    message("Running parse_Intersfile method ...")
+
+    data <- NULL
+
+    if (useHiCPro) {
+        stopifnot(endsWith(infilename, ".matrix.gz") ||
+            endsWith(infilename, ".matrix"))
+        # read the matrix file
+        if (endsWith(infilename, ".matrix.gz")) {
+            data <- data.table(read.table(gzfile(infilename), header=FALSE,
+                col.names = c("index1", "index2", "hitCount")))
+        } else if (endsWith(infilename, ".matrix")) {
+            data <- data.table(read.table(infilename, header=FALSE,
+                col.names = c("index1", "index2", "hitCount")))
+        }
+        names(fragsData) <- c("chr1", "mid1", "index1")
+        data <- merge(data, fragsData, by="index1", all.x=TRUE)
+
+        names(fragsData) <- c("chr2", "mid2", "index2")
+        data <- merge(data, fragsData, by="index2", all.x=TRUE)
+
+        names(fragsData) <- c("chr", "mid", "index")
+
+        if (any(is.na(data))) {
+            stop("BED file and MATRIX file are not matched")
+        }
+        data <- data.table(chr1=data$chr1, mid1=data$mid1, chr2=data$chr2,
+            mid2=data$mid2, hitCount=data$hitCount)
+    } else {
+        if (endsWith(infilename, ".gz")) {
+            data <- data.table(read.table(gzfile(infilename), header=FALSE,
+                col.names = c("chr1", "mid1", "chr2", "mid2", "hitCount")))
+        } else {
+            data <- data.table(read.table(infilename, header=FALSE,
+                col.names = c("chr1", "mid1", "chr2", "mid2", "hitCount")))
+        }
+    }
+
+    message("Complete parse_Intersfile method [OK]")
+
+    return(data)
+}
+
+generate_FragPairs <- function(fragsData, distUpThres, distLowThres) {
 
     message("Running generate_FragPairs method ...")
 
-    chr <- hitCount <- mid1 <- mid2 <- NULL
+    chr <- mid1 <- mid2 <- NULL
 
     possibleInterAllCount <- 0
     possibleIntraAllCount <- 0
@@ -228,24 +315,19 @@ distLowThres) {
     baselineIntraChrProb <- 0 # 1.0/possibleIntraAllCount
     baselineInterChrProb <- 0 # 1.0/possibleInterAllCount
 
-    # read the fragments file
-    data <- data.table(read.table(gzfile(infilename), header=FALSE,
-        col.names=c("chr", "C2", "mid", "hitCount", "C5")))
-    data <- subset(data, hitCount >= mappabilityThreshold)
-
     # list of all chromosomes
-    chrList <- unique(data$chr)
+    chrList <- unique(fragsData$chr)
     # list of all mappable fragments
-    listOfMappableFrags <- data.table(chr=data$chr, mid=data$mid)
+    listOfMappableFrags <- data.table(chr=fragsData$chr, mid=fragsData$mid)
 
     ### In Python, possiblePairsPerDistance is a dictionary(key-value pairs) ###
     ### In R, possiblePairsPerDistance is a data frame(for optimization)     ###
-    ### Each column is chr, mid1, mid2, interactionDistance, hitCount, bias  ###
+    ### Each column is chr, mid1, mid2 and interactionDistance               ###
     possiblePairsPerDistance <- NULL
 
-    totalNoOfFrags <- nrow(data)
+    totalNoOfFrags <- nrow(fragsData)
     for (i in chrList) {
-        fragsPerChr <- subset(data, chr == i)
+        fragsPerChr <- subset(fragsData, chr == i)
         tempLen <- nrow(fragsPerChr)
 
         chr_mid1_data <- data.table(chr=fragsPerChr$chr, mid1=fragsPerChr$mid,
@@ -294,6 +376,7 @@ distLowThres) {
 }
 
 read_ICE_biases <- function(infilename) {
+
     message("Running read_ICE_biases method ...")
 
     bias <- NULL
@@ -307,28 +390,26 @@ read_ICE_biases <- function(infilename) {
     return(biasDic)
 }
 
-read_All_Interactions <- function(infilename, biasDic, listOfMappableFrags,
+read_All_Interactions <- function(intersData, biasDic, listOfMappableFrags,
 possiblePairsPerDistance, distUpThres, distLowThres) {
 
     message("Running read_All_Interactions method ...")
 
     chr1 <- chr2 <- NULL
 
-    data <- data.table(read.table(gzfile(infilename), header=FALSE,
-        col.names = c("chr1", "mid1", "chr2", "mid2", "hitCount")))
-
     # set bias1 and bias2
     if (!is.null(biasDic)) {
         names(biasDic) <- c("chr1", "mid1", "bias1")
-        data <- merge(data, biasDic, by=c("chr1", "mid1"), all.x=TRUE)
+        data <- merge(intersData, biasDic, by=c("chr1", "mid1"), all.x=TRUE)
 
         names(biasDic) <- c("chr2", "mid2", "bias2")
         data <- merge(data, biasDic, by=c("chr2", "mid2"), all.x=TRUE)
 
+        names(biasDic) <- c("chr", "mid", "bias")
         data[is.na(data)] <- 1.0
     } else {
-        data <- data.table(data, bias1=rep(1.0, nrow(data)),
-            bias2=rep(1.0, nrow(data)))
+        data <- data.table(intersData, bias1=rep(1.0, nrow(intersData)),
+            bias2=rep(1.0, nrow(intersData)))
     }
 
     # filter by listOfMappableFrags
@@ -455,7 +536,7 @@ libname, toKb, toProb) {
     return(data.table(x=data$x, y=data$y, yerr=data$yerr))
 }
 
-fit_Spline <- function(x, y, yerr, infilename, sortedInteractions, biasDic,
+fit_Spline <- function(x, y, yerr, intersData, sortedInteractions, biasDic,
 figname, passNo, outdir, visual, distLowThres, distUpThres, toKb, toProb,
 useInters, baselineIntraChrProb, baselineInterChrProb, observedInterAllSum,
 observedIntraAllSum, observedIntraInRangeSum, possibleInterAllCount,
@@ -463,7 +544,7 @@ possibleIntraAllCount, possibleIntraInRangeCount, maxObservedGenomicDist) {
 
     message("Running fit_Spline method ...")
 
-    bias <- bias1 <- bias2 <- chr1 <- chr2 <- hitCount <-
+    bias <- bias1 <- bias2 <- chr1 <- chr2 <- data <- hitCount <-
         interactionDistance <- isOutlier <- p_val <- NULL
 
     ius <- smooth.spline(x, y)
@@ -539,20 +620,17 @@ possibleIntraAllCount, possibleIntraInRangeCount, maxObservedGenomicDist) {
         dev.off()
     }
 
-    data <- data.table(read.table(gzfile(infilename), header=FALSE,
-        col.names = c("chr1", "mid1", "chr2", "mid2", "hitCount")))
-
     if (!is.null(biasDic)) {
         names(biasDic) <- c("chr1", "mid1", "bias1")
-        data <- merge(data, biasDic, by=c("chr1", "mid1"), all.x=TRUE)
+        data <- merge(intersData, biasDic, by=c("chr1", "mid1"), all.x=TRUE)
 
         names(biasDic) <- c("chr2", "mid2", "bias2")
         data <- merge(data, biasDic, by=c("chr2", "mid2"), all.x=TRUE)
 
         data[is.na(data)] <- 1.0
     } else {
-        data <- data.table(data, bias1=rep(1.0, nrow(data)), bias2=rep(1.0,
-            nrow(data)))
+        data <- data.table(intersData, bias1=rep(1.0, nrow(intersData)),
+            bias2=rep(1.0, nrow(intersData)))
     }
 
     ### chr1 mid1 chr2 mid2 interactionDistance hitCount bias1 bias2 p_val ###
