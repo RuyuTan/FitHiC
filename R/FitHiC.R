@@ -157,7 +157,7 @@ distLowThres=-1, visual=FALSE, useHiCPro=FALSE) {
 
     biasDic <- NULL
     if (biasfile != "none") {
-        biasDic <- read_ICE_biases(biasfile)
+        biasDic <- read_ICE_biases(biasfile, fragsData, useHiCPro)
     }
 
     r2 <- read_All_Interactions(intersData, biasDic, listOfMappableFrags,
@@ -375,15 +375,33 @@ generate_FragPairs <- function(fragsData, distUpThres, distLowThres) {
         baselineIntraChrProb=baselineIntraChrProb))
 }
 
-read_ICE_biases <- function(infilename) {
+read_ICE_biases <- function(infilename, fragsData, useHiCPro) {
 
     message("Running read_ICE_biases method ...")
 
-    bias <- NULL
+    bias <- data <- NULL
 
-    data <- data.table(read.table(gzfile(infilename), header=FALSE,
-        col.names=c("chr", "mid", "bias")))
-    biasDic <- data[bias < 0.5 | bias > 2, bias := -1]
+    if (useHiCPro) {
+        if (endsWith(infilename, ".gz")) {
+            data <- data.table(read.table(gzfile(infilename), header=FALSE,
+                col.names = c("bias")))
+        } else {
+            data <- data.table(read.table(infilename, header=FALSE,
+                col.names = c("bias")))
+        }
+        data <- data.table(index=seq(1, nrow(data), 1), bias=data$bias)
+        data <- merge(fragsData, data, all.x=TRUE)
+        data <- data.table(chr=data$chr, mid=data$mid, bias=data$bias)
+    } else {
+        if (endsWith(infilename, ".gz")) {
+            data <- data.table(read.table(gzfile(infilename), header=FALSE,
+                col.names=c("chr", "mid", "bias")))
+        } else {
+            data <- data.table(read.table(infilename, header=FALSE,
+                col.names=c("chr", "mid", "bias")))
+        }
+    }
+    biasDic <- data[bias < 0.5 | bias > 2 | is.na(bias), bias := -1]
 
     message("Complete read_ICE_biases method [OK]")
 
