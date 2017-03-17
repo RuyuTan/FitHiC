@@ -14,15 +14,23 @@ vignette: >
 
 ## Introduction
 
-[Fit-Hi-C](https://noble.gs.washington.edu/proj/fit-hi-c/) is a tool for
+[Fit-Hi-C](http://genome.cshlp.org/content/24/6/999) is a tool for
 assigning statistical confidence estimates to intra-chromosomal contact maps
-produced by genome-wide genome architecture assays such as Hi-C. Compared to
-Python original, Fit-Hi-C R port has the following advantages:
+produced by genome-wide genome conformation capture assays such as Hi-C as well as newer technologies 
+such as PLAC-seq, HiChIP and region capture Hi-C. When using Fit-Hi-C with Hi-C data, 
+we strongly suggest using bias values from matrix balancing-based normalization methods such 
+as ICE or KR to control for experimental and techical biases in significance estimation.
+While using bias values, please make sure to use RAW counts and NOT the normalized counts as
+normalization will be taken into account through bias values. 
+Here we provide an R implementation of Fit-Hi-C. Compared to its original implementation in Python (https://noble.gs.washington.edu/proj/fit-hi-c), Fit-Hi-C R port has the following advantages:
 
 - Fit-Hi-C R package is more efficient than Python original by re-writting some
 logic in C/C++
-- Fit-Hi-C R package is easy to use for those familiar with R language without
+- Fit-Hi-C R package is easy to use for those familiar with R language and Bioconductor without
 additional configuration
+- Bug fixes on "nan" errors in q-value computation and plotting
+- Compatible with output of hicpro2fithic.py script available in HiCPro 2.8.1 or above 
+or linked here <FIXME> 
 
 ## Install FitHiC
 
@@ -34,7 +42,7 @@ source("https://bioconductor.org/biocLite.R")
 biocLite("FitHiC")
 ```
 
-## Example I: run yeast data
+## Example I: Yeast (S. cerevisiae) Hi-C data at single restriction enzyme (RE) resolution without bias values
 
 __Duan_yeast_EcoRI__
 
@@ -135,8 +143,7 @@ FitHiC(fragsfile, intersfile, outdir, libname="Duan_yeast_HindIII",
     distUpThres=250000, distLowThres=10000)
 ```
 
-## Example II: run human data - fixed size windows (40kb)
-
+## Example II: Human ESC Hi-C data at 40kb fixed size resolution (only chr1) without bias values
 ```{r, message=FALSE, warning=FALSE, results="hide"}
 library("FitHiC")
 fragsfile <- system.file("extdata",
@@ -157,7 +164,7 @@ FitHiC(fragsfile, intersfile, outdir,
 | ![](Dixon_hESC_HindIII_hg18_w40000_chr1/Dixon_hESC_HindIII_hg18_w40000_chr1.spline_pass1.extractOutliers.png) | ![](Dixon_hESC_HindIII_hg18_w40000_chr1/Dixon_hESC_HindIII_hg18_w40000_chr1.spline_pass1.qplot.png) |
 +---------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 
-## Example III: run human data - RE fragment resolution (10RE)
+## Example III: Human ESC Hi-C data at 10 consecutive RE resolution (only chr1) without bias values
 
 ```{r, message=FALSE, warning=FALSE, results="hide"}
 library("FitHiC")
@@ -199,7 +206,7 @@ FitHiC(fragsfile, intersfile, outdir,
 | ![](Dixon_mESC_HindIII_mm9_combineFrags10_chr1/Dixon_mESC_HindIII_mm9_combineFrags10_chr1.spline_pass1.extractOutliers.png) | ![](Dixon_mESC_HindIII_mm9_combineFrags10_chr1/Dixon_mESC_HindIII_mm9_combineFrags10_chr1.spline_pass1.qplot.png) |
 +-----------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 
-## Example IV: run normalized human data - fixed size windows
+## Example IV: Human ESC Hi-C data at 40kb fixed size resolution (only chr1) WITH bias values 
 
 ```{r, message=FALSE, warning=FALSE, results="hide"}
 library("FitHiC")
@@ -226,17 +233,17 @@ FitHiC(fragsfile, intersfile, outdir, biasfile,
 
 ## Prepare Data
 
-Before running Fit-Hi-C, two input files should be prepared.
+Before running Fit-Hi-C, (at least) two input files should be prepared.
 
 * __FRAGSFILE__ This file stores the information about midpoints (or start
 indices) of the fragments. It should consist of 5 columns: first column stands
 for chromosome name; third column stands for the midPoint; fourth column stands
 for the hitCount; second column and fifth column will be ignored so you can set
-them to 0. HitCount is only used for filtering in conjuction with the
-"mappabilityThreshold" option. By default setting bins to be filtered to "0" and
-those to be considered the "1" and "-m1" is enough. You do not need to compute
-hitCount unless you will explicitly filter using a custom threshold set by
-"mappabilityThreshold" option.
+them to 0. HitCount (4th column) is only used for filtering in conjuction with the
+"mappabilityThreshold" option. By default setting bins that need to be filtered to "0" and
+others to "1" and leaving the mappabilityThreshold option to its default value of 1 is enough. 
+You do not need to compute hitCount (4th column) unless you will explicitly filter using a custom 
+threshold on marginal counts set by the "mappabilityThreshold" option.
 
 ```{r fragsfile, echo = FALSE, results = "asis"}
 fragsfile <- system.file("extdata",
@@ -251,8 +258,10 @@ knitr::kable(head(data, n=6L), align = "crrrr", caption="FRAGSFILE")
 fragment pairs. It should consist of 5 columns: first column and third column
 stand for the chromosome names of the fragment pair; second column and fourth
 column stand for midPoints of the fragment pair; fifth column stands for
-hitCount. Make sure that midpoints in this file match those in fragsfile and in
-biasfile (when normalization is applied).
+contact count between the two bins. Make sure that midpoints in this file match 
+those in fragsfile and in biasfile (when normalization is applied). Make sure 
+to use RAW contact counts and NOT the normalized counts. Use BIASFILE if 
+normalization is to be taken into account (Highly suggested). 
 
 ```{r intersfile, echo=FALSE, results="asis"}
 intersfile <- system.file("extdata",
@@ -263,9 +272,10 @@ data <- read.table(gzfile(intersfile), header=FALSE,
 knitr::kable(head(data, n=6L), align = "crcrr", caption="INTERSFILE")
 ```
 
-* __BIASFILE__ FitHiC works with matrix balancing ... normalization(ICE, KR,
-VC). These methods provide a bias value per bin/locus with 
-bias = 1 (average)
+* __BIASFILE__ FitHiC works with matrix balancing-based normalization methods 
+such as (ICE, KR or Vanilla Coverage). These methods provide a bias value per bin/locus, 
+the vector of which should be centered on 1 so that:  
+bias = 1 (expected amount of count/visibility)
 bias > 1 (higher than expected count)
 bias < 1 (lower than expected count)
 
@@ -277,14 +287,19 @@ data <- read.table(gzfile(biasfile), header=FALSE,
 knitr::kable(head(data, n=6L), align = "crr", caption="BIASFILE")
 ```
 
+<FIXME> take another set of lines for which the bias values are not all 1.
+
 Besides, __OUTDIR__, the path where the output files will be stored, is also
 required to be specified.
 
 ## Support
 
 For questions about the use of Fit-Hi-C method, to request pre-processed Hi-C
-data or additional features and scripts, or to report bugs and provide feedback
+data and/or additional features and scripts, or to report bugs and provide feedback
 please e-mail Ferhat Ay.
 
 [Ferhat Ay](http://www.lji.org/faculty-research/labs/ay)
 \<ferhatay at lji dot org\>
+
+Fit-Hi-C R package maintainer Ruyu Tan
+\<rut003 at ucsd dot edu\>
