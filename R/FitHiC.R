@@ -336,7 +336,7 @@ generate_FragPairs <- function(fragsData, distUpThres, distLowThres) {
 
         intraPairs <- merge(chr_mid1_data, mid2_data, by="dummy", all=TRUE,
             allow.cartesian=TRUE)
-        intraPairs <- subset(intraPairs, mid1 < mid2)
+        intraPairs <- subset(intraPairs, mid1 <= mid2)
         intraPairs <- data.table(chr=intraPairs$chr, mid1=intraPairs$mid1,
             mid2=intraPairs$mid2,
             interactionDistance=abs(intraPairs$mid1 - intraPairs$mid2))
@@ -468,7 +468,7 @@ possiblePairsPerDistance, distUpThres, distLowThres) {
     temp <- nrow(possiblePairsPerDistance)
     possiblePairsPerDistance <- merge(possiblePairsPerDistance,
         intraInRange_data, by=c("chr", "mid1", "mid2", "interactionDistance"),
-        all=FALSE, allow.cartesian=TRUE)
+        all=TRUE, allow.cartesian=TRUE)
     if (temp < nrow(possiblePairsPerDistance)) {
         stop("Illegal fragment pair")
     }
