@@ -468,7 +468,7 @@ possiblePairsPerDistance, distUpThres, distLowThres) {
     temp <- nrow(possiblePairsPerDistance)
     possiblePairsPerDistance <- merge(possiblePairsPerDistance,
         intraInRange_data, by=c("chr", "mid1", "mid2", "interactionDistance"),
-        all=TRUE, allow.cartesian=TRUE)
+        all=FALSE, allow.cartesian=TRUE)
     if (temp < nrow(possiblePairsPerDistance)) {
         stop("Illegal fragment pair")
     }
