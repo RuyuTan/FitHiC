@@ -297,6 +297,8 @@ parse_Intersfile <- function(infilename, fragsData, useHiCPro) {
         }
     }
 
+    data <- subset(data, mid1 <= mid2)
+
     message("Complete parse_Intersfile method [OK]")
 
     return(data)
@@ -465,9 +467,13 @@ possiblePairsPerDistance, distUpThres, distLowThres) {
     observedIntraInRangeSum <- sum(intraInRange_data$hitCount)
     observedIntraInRangeCount <- nrow(intraInRange_data)
 
+    temp <- nrow(possiblePairsPerDistance)
     possiblePairsPerDistance <- merge(possiblePairsPerDistance,
         intraInRange_data, by=c("chr", "mid1", "mid2", "interactionDistance"),
         all=TRUE, allow.cartesian=TRUE)
+    if (temp < nrow(possiblePairsPerDistance)) {
+        stop("Illegal fragment pair")
+    }
 
     hitCount_data <- possiblePairsPerDistance$hitCount
     hitCount_data[is.na(hitCount_data)] <- 0
