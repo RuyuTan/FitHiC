@@ -297,7 +297,7 @@ parse_Intersfile <- function(infilename, fragsData, useHiCPro) {
         }
     }
 
-    data <- subset(data, mid1 <= mid2)
+    data <- subset(data, mid1 < mid2)
 
     message("Complete parse_Intersfile method [OK]")
 
@@ -338,7 +338,7 @@ generate_FragPairs <- function(fragsData, distUpThres, distLowThres) {
 
         intraPairs <- merge(chr_mid1_data, mid2_data, by="dummy", all=TRUE,
             allow.cartesian=TRUE)
-        intraPairs <- subset(intraPairs, mid1 <= mid2)
+        intraPairs <- subset(intraPairs, mid1 < mid2)
         intraPairs <- data.table(chr=intraPairs$chr, mid1=intraPairs$mid1,
             mid2=intraPairs$mid2,
             interactionDistance=abs(intraPairs$mid1 - intraPairs$mid2))
