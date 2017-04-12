@@ -261,7 +261,7 @@ parse_Intersfile <- function(infilename, fragsData, useHiCPro) {
 
     message("Running parse_Intersfile method ...")
 
-    data <- NULL
+    data <- mid1 <- mid2 <- NULL
 
     if (useHiCPro) {
         stopifnot(endsWith(infilename, ".matrix.gz") ||
