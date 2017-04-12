@@ -361,7 +361,7 @@ generate_FragPairs <- function(fragsData, distUpThres, distLowThres) {
     # every inter-chr interaction is counted only once
     possibleInterAllCount <- possibleInterAllCount / 2
     # calculate inter-chr probabilities
-    if (possibleInterAllCount > 0) {
+    if (!is.na(possibleInterAllCount) & possibleInterAllCount > 0) {
         baselineInterChrProb <- 1.0 / possibleInterAllCount
     }
     baselineIntraChrProb <- 1.0 / possibleIntraAllCount
@@ -470,9 +470,9 @@ possiblePairsPerDistance, distUpThres, distLowThres) {
     temp <- nrow(possiblePairsPerDistance)
     possiblePairsPerDistance <- merge(possiblePairsPerDistance,
         intraInRange_data, by=c("chr", "mid1", "mid2", "interactionDistance"),
-        all=TRUE, allow.cartesian=TRUE)
+        all.x=TRUE, all.y=FALSE, allow.cartesian=FALSE)
     if (temp < nrow(possiblePairsPerDistance)) {
-        stop("Illegal fragment pair")
+        stop("Unexpected Fragment Pairs")
     }
 
     hitCount_data <- possiblePairsPerDistance$hitCount
