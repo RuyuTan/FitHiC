@@ -130,6 +130,13 @@ FitHiC(fragsfile, intersfile, outdir, biasfile,
     libname="Dixon_hESC_HindIII_hg18_w40000_chr1", noOfBins=50,
     distUpThres=5000000, distLowThres=50000)
 
+fragsfile <- system.file("extdata", "fragmentLists/data_5000000_abs.bed.gz",
+    package = "FitHiC")
+intersfile <- system.file("extdata",
+    "contactCounts/data_5000000_iced.matrix.gz", package = "FitHiC")
+outdir <- file.path(getwd(), "data_5000000")
+FitHiC(fragsfile, intersfile, outdir, libname="data_5000000", useHiCPro=TRUE)
+
 }
 \author{
 Ruyu Tan, \email{rut003@ucsd.edu}

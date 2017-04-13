@@ -231,6 +231,25 @@ FitHiC(fragsfile, intersfile, outdir, biasfile,
 | ![](Dixon_hESC_HindIII_hg18_w40000_chr1.afterICE/Dixon_hESC_HindIII_hg18_w40000_chr1.spline_pass1.extractOutliers.png) | ![](Dixon_hESC_HindIII_hg18_w40000_chr1.afterICE/Dixon_hESC_HindIII_hg18_w40000_chr1.spline_pass1.qplot.png) |
 +------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 
+## Example V: MFC7 HiC-Pro data at 5000kb resolution without bias values
+
+```{r, message=FALSE, warning=FALSE, results="hide"}
+library("FitHiC")
+fragsfile <- system.file("extdata", "fragmentLists/data_5000000_abs.bed.gz",
+    package = "FitHiC")
+intersfile <- system.file("extdata",
+    "contactCounts/data_5000000_iced.matrix.gz", package = "FitHiC")
+outdir <- file.path(getwd(), "data_5000000")
+FitHiC(fragsfile, intersfile, outdir, libname="data_5000000", visual=TRUE,
+    useHiCPro=TRUE)
+```
+
++-----------------------------------------------------------------+-------------------------------------------------------+
+| ![](data_5000000/data_5000000.fithic_pass1.png)                 | ![](data_5000000/data_5000000.spline_pass1.png)       |
++-----------------------------------------------------------------+-------------------------------------------------------+
+| ![](data_5000000/data_5000000.spline_pass1.extractOutliers.png) | ![](data_5000000/data_5000000.spline_pass1.qplot.png) |
++-----------------------------------------------------------------+-------------------------------------------------------+
+
 ## Prepare Data
 
 Before running Fit-Hi-C, (at least) two input files should be prepared.
