@@ -14,23 +14,26 @@ vignette: >
 
 ## Introduction
 
-[Fit-Hi-C](http://genome.cshlp.org/content/24/6/999) is a tool for
-assigning statistical confidence estimates to intra-chromosomal contact maps
-produced by genome-wide genome conformation capture assays such as Hi-C as well as newer technologies 
-such as PLAC-seq, HiChIP and region capture Hi-C. When using Fit-Hi-C with Hi-C data, 
-we strongly suggest using bias values from matrix balancing-based normalization methods such 
-as ICE or KR to control for experimental and techical biases in significance estimation.
-While using bias values, please make sure to use RAW counts and NOT the normalized counts as
-normalization will be taken into account through bias values. 
-Here we provide an R implementation of Fit-Hi-C. Compared to its original implementation in Python (https://noble.gs.washington.edu/proj/fit-hi-c), Fit-Hi-C R port has the following advantages:
+[Fit-Hi-C](http://genome.cshlp.org/content/24/6/999) is a tool for assigning
+statistical confidence estimates to intra-chromosomal contact maps produced by
+genome-wide genome conformation capture assays such as Hi-C as well as newer
+technologies such as PLAC-seq, HiChIP and region capture Hi-C. When using
+Fit-Hi-C with Hi-C data, we strongly suggest using bias values from matrix
+balancing-based normalization methods such as ICE or KR to control for
+experimental and techical biases in significance estimation. While using bias
+values, please make sure to use RAW counts and NOT the normalized counts as
+normalization will be taken into account through bias values. Here we provide an
+R implementation of Fit-Hi-C. Compared to its original implementation in Python
+(https://noble.gs.washington.edu/proj/fit-hi-c), Fit-Hi-C R port has the
+following advantages:
 
 - Fit-Hi-C R package is more efficient than Python original by re-writting some
 logic in C/C++
-- Fit-Hi-C R package is easy to use for those familiar with R language and Bioconductor without
-additional configuration
+- Fit-Hi-C R package is easy to use for those familiar with R language and
+Bioconductor without additional configuration
 - Bug fixes on "nan" errors in q-value computation and plotting
-- Compatible with output of hicpro2fithic.py script available in HiCPro 2.8.1 or above 
-or linked here <FIXME> 
+- Compatible with output of hicpro2fithic.py script available in
+[HiCPro 2.8.1](https://github.com/nservant/HiC-Pro/tree/master/bin/utils)
 
 ## Install FitHiC
 
@@ -270,11 +273,12 @@ There are two different options for running FitHiC:
 indices) of the fragments. It should consist of 5 columns: first column stands
 for chromosome name; third column stands for the midPoint; fourth column stands
 for the hitCount; second column and fifth column will be ignored so you can set
-them to 0. HitCount (4th column) is only used for filtering in conjuction with the
-"mappabilityThreshold" option. By default setting bins that need to be filtered to "0" and
-others to "1" and leaving the mappabilityThreshold option to its default value of 1 is enough. 
-You do not need to compute hitCount (4th column) unless you will explicitly filter using a custom 
-threshold on marginal counts set by the "mappabilityThreshold" option.
+them to 0. HitCount (4th column) is only used for filtering in conjuction with
+the "mappabilityThreshold" option. By default setting bins that need to be
+filtered to "0" and others to "1" and leaving the mappabilityThreshold option to
+its default value of 1 is enough. You do not need to compute hitCount (4th
+column) unless you will explicitly filter using a custom threshold on marginal
+counts set by the "mappabilityThreshold" option.
 
 ```{r fragsfile, echo = FALSE, results = "asis"}
 fragsfile <- system.file("extdata",
@@ -304,8 +308,8 @@ knitr::kable(head(data, n=6L), align = "crcrr", caption="INTERSFILE")
 ```
 
 * __BIASFILE__ FitHiC works with matrix balancing-based normalization methods 
-such as (ICE, KR or Vanilla Coverage). These methods provide a bias value per bin/locus, 
-the vector of which should be centered on 1 so that:  
+such as (ICE, KR or Vanilla Coverage). These methods provide a bias value per
+bin/locus, the vector of which should be centered on 1 so that:  
 bias = 1 (expected amount of count/visibility)
 bias > 1 (higher than expected count)
 bias < 1 (lower than expected count)
@@ -324,8 +328,8 @@ required to be specified.
 ## Support
 
 For questions about the use of Fit-Hi-C method, to request pre-processed Hi-C
-data and/or additional features and scripts, or to report bugs and provide feedback
-please e-mail Ferhat Ay.
+data and/or additional features and scripts, or to report bugs and provide
+feedback please e-mail Ferhat Ay.
 
 [Ferhat Ay](http://www.lji.org/faculty-research/labs/ay)
 \<ferhatay at lji dot org\>
