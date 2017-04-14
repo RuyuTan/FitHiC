@@ -117,7 +117,7 @@
 #'     "biasPerLocus/data_5000000_iced.matrix.biases.gz", package = "FitHiC")
 #' outdir <- file.path(getwd(), "data_5000000")
 #' FitHiC(fragsfile, intersfile, outdir, biasfile, libname="data_5000000",
-#'     distUpThreshold=500000000, distLowThres=5000000, useHiCPro=TRUE)
+#'     distUpThres=500000000, distLowThres=5000000, useHiCPro=TRUE)
 #'
 #' @import data.table
 #' @import fdrtool
