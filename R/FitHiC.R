@@ -111,10 +111,13 @@
 #'
 #' fragsfile <- system.file("extdata", "fragmentLists/data_5000000_abs.bed.gz",
 #'     package = "FitHiC")
-#' intersfile <- system.file("extdata",
-#'     "contactCounts/data_5000000_iced.matrix.gz", package = "FitHiC")
+#' intersfile <- system.file("extdata", "contactCounts/data_5000000.matrix.gz",
+#'     package = "FitHiC")
+#' biasfile <- system.file("extdata",
+#'     "biasPerLocus/data_5000000_iced.matrix.biases.gz", package = "FitHiC")
 #' outdir <- file.path(getwd(), "data_5000000")
-#' FitHiC(fragsfile, intersfile, outdir, libname="data_5000000", useHiCPro=TRUE)
+#' FitHiC(fragsfile, intersfile, outdir, biasfile, libname="data_5000000",
+#'     distUpThreshold=500000000, distLowThres=5000000, useHiCPro=TRUE)
 #'
 #' @import data.table
 #' @import fdrtool

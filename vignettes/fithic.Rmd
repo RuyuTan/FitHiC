@@ -231,17 +231,19 @@ FitHiC(fragsfile, intersfile, outdir, biasfile,
 | ![](Dixon_hESC_HindIII_hg18_w40000_chr1.afterICE/Dixon_hESC_HindIII_hg18_w40000_chr1.spline_pass1.extractOutliers.png) | ![](Dixon_hESC_HindIII_hg18_w40000_chr1.afterICE/Dixon_hESC_HindIII_hg18_w40000_chr1.spline_pass1.qplot.png) |
 +------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------+
 
-## Example V: MFC7 HiC-Pro data at 5000kb resolution without bias values
+## Example V: Human MCF7 HiC-Pro data at 5Mb resolution WITH bias values
 
 ```{r, message=FALSE, warning=FALSE, results="hide"}
 library("FitHiC")
 fragsfile <- system.file("extdata", "fragmentLists/data_5000000_abs.bed.gz",
     package = "FitHiC")
-intersfile <- system.file("extdata",
-    "contactCounts/data_5000000_iced.matrix.gz", package = "FitHiC")
+intersfile <- system.file("extdata", "contactCounts/data_5000000.matrix.gz",
+    package = "FitHiC")
+biasfile <- system.file("extdata",
+    "biasPerLocus/data_5000000_iced.matrix.biases.gz", package = "FitHiC")
 outdir <- file.path(getwd(), "data_5000000")
-FitHiC(fragsfile, intersfile, outdir, libname="data_5000000", visual=TRUE,
-    useHiCPro=TRUE)
+FitHiC(fragsfile, intersfile, outdir, biasfile, libname="data_5000000",
+    distUpThres=500000000, distLowThres=5000000, visual=TRUE, useHiCPro=TRUE)
 ```
 
 +-----------------------------------------------------------------+-------------------------------------------------------+
@@ -250,9 +252,19 @@ FitHiC(fragsfile, intersfile, outdir, libname="data_5000000", visual=TRUE,
 | ![](data_5000000/data_5000000.spline_pass1.extractOutliers.png) | ![](data_5000000/data_5000000.spline_pass1.qplot.png) |
 +-----------------------------------------------------------------+-------------------------------------------------------+
 
-## Prepare Data
+## References
+1. Fit-Hi-C original manuscript: Ay et al. Genome Research, 2014 - https://www.ncbi.nlm.nih.gov/pubmed/24501021
+2. Fit-Hi-C Python implementation - https://noble.gs.washington.edu/proj/fit-hi-c
+3. Budding yeast Hi-C data: Duan et al. Nature, 2010 - https://www.ncbi.nlm.nih.gov/pubmed/20436457
+4. Human embryonic stem cell Hi-C data: Dixon et al. Nature, 2012 - https://www.ncbi.nlm.nih.gov/pubmed/22495300
+5. Human MCF7 cell line Hi-C data: Barutcu et al. Genome Biology, 2015 - https://www.ncbi.nlm.nih.gov/pubmed/26415882
 
-Before running Fit-Hi-C, (at least) two input files should be prepared.
+## Prepare Data
+There are two different options for running FitHiC:
+
+1. Use Hi-C pro pipeline;
+
+2. Prepare at least two input files described below:
 
 * __FRAGSFILE__ This file stores the information about midpoints (or start
 indices) of the fragments. It should consist of 5 columns: first column stands
@@ -305,8 +317,6 @@ data <- read.table(gzfile(biasfile), header=FALSE,
     col.names=c("Chromosome Name", "Mid Point", "Bias"))
 knitr::kable(head(data, n=6L), align = "crr", caption="BIASFILE")
 ```
-
-<FIXME> take another set of lines for which the bias values are not all 1.
 
 Besides, __OUTDIR__, the path where the output files will be stored, is also
 required to be specified.
